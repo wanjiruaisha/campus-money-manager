@@ -35,19 +35,24 @@ The application is designed to help students manage weekly or monthly budgets, r
 * **Git & GitHub** – Used for version control and project management.
 
 ## Project Structure
-
 ```text
 campus_money_manager/
 │
+├── gui/
+│   ├── __init__.py
+│   ├── app.py
+│   ├── dashboard.py
+│   ├── expenses.py
+│   ├── budget.py
+│   └── affordability.py
+│
 ├── main.py
-├── gui.py
 ├── database.py
 ├── models.py
 ├── utils.py
 ├── README.md
 └── .gitignore
 ```
-
 ### File Description
 
 * `main.py` – Starts the application.
