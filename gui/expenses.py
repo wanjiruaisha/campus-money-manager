@@ -346,11 +346,11 @@ class ExpenseFrame(ttk.Frame):
         )
 
         delete_button = ttk.Button(
-            history_buttons,
-            text="Delete Selected",
-            command=self.delete_selected_expense
-        )
-
+           history_buttons,
+           text="Delete Selected",
+           command=self.delete_selected_expense,
+           style="Danger.TButton"
+         )
         delete_button.pack(
             side="left",
             padx=5
