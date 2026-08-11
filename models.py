@@ -1,9 +1,14 @@
 class Expense:
-    """
-    Represents a single expense in the application.
-    """
+    """Represents one expense."""
 
-    def __init__(self, amount, category, description, date, expense_id=None):
+    def __init__(
+        self,
+        amount,
+        category,
+        description,
+        date,
+        expense_id=None
+    ):
         self.expense_id = expense_id
         self.amount = amount
         self.category = category
@@ -12,9 +17,7 @@ class Expense:
 
 
 class Budget:
-    """
-    Represents a weekly or monthly budget.
-    """
+    """Represents a weekly or monthly budget."""
 
     def __init__(
         self,
