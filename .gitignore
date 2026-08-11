@@ -1,0 +1,9 @@
+# Python generated files
+__pycache__/
+*.pyc
+
+# VS Code settings
+.vscode/
+
+# SQLite database
+*.db
