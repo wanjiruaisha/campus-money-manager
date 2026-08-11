@@ -146,10 +146,11 @@ class BudgetFrame(ttk.Frame):
             padx=10
         )
 
-        save_button = ttk.Button(
+        save_button = ttk.  Button(
             form,
             text="Save Budget",
-            command=self.save
+             command=self.save,
+            style="Success.TButton"
         )
 
         save_button.grid(
