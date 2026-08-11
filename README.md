@@ -1,42 +1,36 @@
 # Campus Money Manager
 
-Campus Money Manager is a desktop-based budgeting and expense management application built using Python, Tkinter, SQLite, and Object-Oriented Programming.
+Campus Money Manager is a desktop budgeting and expense management application built using Python, Tkinter, SQLite, and Object-Oriented Programming.
 
-The application is designed to help students manage weekly or monthly budgets, record daily expenses, monitor spending, and make better decisions about how they use their available money.
+It is designed to help students manage weekly or monthly budgets, record daily expenses, monitor spending, and make better financial decisions.
 
 ## Features
 
-* Set a weekly or monthly budget.
-* Record daily expenses.
-* Categorize expenses such as:
-
-  * Food
-  * Transport
-  * School
-  * Airtime and Data
-  * Entertainment
-  * Personal Expenses
-* View previously recorded expenses.
-* Edit existing expense records.
-* Delete expense records.
-* Automatically calculate total spending.
-* Calculate the remaining budget.
-* Calculate a recommended daily spending allowance.
-* Check whether a planned purchase fits within the remaining budget.
-* Store budget and expense information permanently using SQLite.
+* Set a weekly or monthly budget
+* Add daily expenses
+* Categorize expenses
+* View expense history
+* Edit expenses
+* Delete expenses
+* Calculate total spending
+* Calculate remaining budget
+* Calculate recommended daily allowance
+* Check whether a planned purchase fits within the remaining budget
+* Store data permanently using SQLite
 
 ## Technologies Used
 
-* **Python** – Main programming language and application logic.
-* **Tkinter** – Used to build the graphical user interface.
-* **SQLite** – Used to store budget and expense information.
-* **SQL** – Used to create, retrieve, update, and delete database records.
-* **Object-Oriented Programming (OOP)** – Used to organize the application using classes and objects.
-* **Git & GitHub** – Used for version control and project management.
+* Python
+* Tkinter
+* SQLite
+* SQL
+* Object-Oriented Programming
+* Git & GitHub
 
 ## Project Structure
+
 ```text
-campus_money_manager/
+campus-money-manager/
 │
 ├── gui/
 │   ├── __init__.py
@@ -53,68 +47,68 @@ campus_money_manager/
 ├── README.md
 └── .gitignore
 ```
-### File Description
 
-* `main.py` – Starts the application.
-* `gui.py` – Contains the Tkinter graphical user interface.
-* `database.py` – Handles SQLite database connections and CRUD operations.
-* `models.py` – Contains OOP classes such as `Expense` and `Budget`.
-* `utils.py` – Contains reusable calculations and helper functions.
-* `README.md` – Contains project documentation.
-* `.gitignore` – Specifies files that should not be tracked by Git.
+## Installation
 
-## Database
+### 1. Clone the repository
 
-The application uses SQLite as its local database.
+```bash
+git clone <https://github.com/wanjiruaisha/campus-money-manager.git>
+```
 
-The database stores:
+Move into the project folder:
 
-* Expense amount
-* Expense category
-* Expense description
-* Expense date
-* Budget amount
-* Budget period
-* Budget start and end dates
+```bash
+cd campus-money-manager
+```
 
-The database supports CRUD operations:
+### 2. Check Python
 
-* **Create** – Add new expenses and budgets.
-* **Read** – View stored expenses and budget information.
-* **Update** – Edit existing expense or budget records.
-* **Delete** – Remove expense records.
+Make sure Python 3 is installed:
 
-## Getting Started
+```bash
+python --version
+```
 
-### Requirements
+### 3. Check Tkinter
 
-* Python 3
-* Tkinter
-* SQLite
+Tkinter normally comes with Python.
 
-Tkinter and SQLite are included with most standard Python installations.
+```bash
+python -m tkinter
+```
 
-### Running the Application
+A small Tkinter window should open.
 
-Clone or download the project, open the project folder in a terminal, and run:
+SQLite is also included with Python, so no additional installation is required.
+
+## Run the Application
+
+From inside the project folder:
 
 ```bash
 python main.py
 ```
 
+The SQLite database file will be created automatically when the application runs.
+
+## Main Sections
+
+* **Dashboard** – Displays budget and spending information
+* **Expenses** – Add, view, edit, and delete expenses
+* **Budget** – Set or update a weekly or monthly budget
+* **Can I Afford This?** – Check whether a planned purchase fits within the remaining budget
+
 ## Project Objective
 
-The main objective of Campus Money Manager is to create a simple desktop application that helps students monitor and manage limited weekly or monthly funds while demonstrating the practical use of Python, Tkinter, SQLite, SQL, CRUD operations, and Object-Oriented Programming.
+The objective of this project is to build a student budgeting application while demonstrating Python, Tkinter, SQLite, SQL, CRUD operations, OOP, input validation, and modular programming.
 
 ## Future Improvements
 
-Possible future improvements include:
-
-* Expense search and filtering.
-* Spending charts and visual reports.
-* Emergency savings management.
-* Exporting expense reports to CSV.
-* More detailed spending insights.
+* Expense search and filtering
+* Spending charts
+* CSV export
+* Additional spending insights
 
 ## Author
 
