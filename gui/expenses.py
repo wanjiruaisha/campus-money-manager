@@ -1,14 +1,7 @@
 import tkinter as tk
 
-from tkinter import (
-    ttk,
-    messagebox
-)
-
-from datetime import (
-    date,
-    datetime
-)
+from tkinter import ttk, messagebox
+from datetime import date, datetime
 
 from models import Expense
 
@@ -23,16 +16,12 @@ from database import (
 class ExpenseFrame(ttk.Frame):
     """Screen used to manage expenses."""
 
-    def __init__(
-        self,
-        parent,
-        on_change=None
-    ):
+    def __init__(self, parent, on_change=None):
         super().__init__(parent)
 
         self.on_change = on_change
 
-        # ID of expense currently being edited
+        # ID of the expense currently being edited
         self.selected_expense_id = None
 
         self.create_widgets()
@@ -40,6 +29,8 @@ class ExpenseFrame(ttk.Frame):
 
     def create_widgets(self):
         """Create expense form and history table."""
+
+        # ---------------- TITLE ----------------
 
         title = ttk.Label(
             self,
@@ -49,7 +40,7 @@ class ExpenseFrame(ttk.Frame):
 
         title.pack(pady=20)
 
-        # ---------------- FORM ----------------
+        # ---------------- EXPENSE FORM ----------------
 
         form = ttk.LabelFrame(
             self,
@@ -176,6 +167,7 @@ class ExpenseFrame(ttk.Frame):
             pady=8
         )
 
+        # Automatically add today's date
         self.date_entry.insert(
             0,
             date.today().isoformat()
@@ -191,7 +183,8 @@ class ExpenseFrame(ttk.Frame):
             padx=10
         )
 
-        # Form buttons
+        # ---------------- FORM BUTTONS ----------------
+
         button_frame = ttk.Frame(
             form
         )
@@ -206,7 +199,8 @@ class ExpenseFrame(ttk.Frame):
         self.save_button = ttk.Button(
             button_frame,
             text="Save Expense",
-            command=self.save_expense
+            command=self.save_expense,
+            style="Success.TButton"
         )
 
         self.save_button.pack(
@@ -225,7 +219,7 @@ class ExpenseFrame(ttk.Frame):
             padx=5
         )
 
-        # ---------------- HISTORY ----------------
+        # ---------------- EXPENSE HISTORY ----------------
 
         history_frame = ttk.LabelFrame(
             self,
@@ -237,7 +231,62 @@ class ExpenseFrame(ttk.Frame):
             fill="both",
             expand=True,
             padx=25,
-            pady=15
+            pady=10
+        )
+
+        # Buttons inside the Expense History section
+        history_buttons = ttk.Frame(
+            history_frame
+        )
+
+        history_buttons.pack(
+            side="bottom",
+            pady=10
+        )
+
+        edit_button = ttk.Button(
+            history_buttons,
+            text="Edit Selected",
+            command=self.edit_selected_expense
+        )
+
+        edit_button.pack(
+            side="left",
+            padx=5
+        )
+
+        delete_button = ttk.Button(
+            history_buttons,
+            text="Delete Selected",
+            command=self.delete_selected_expense,
+            style="Danger.TButton"
+        )
+
+        delete_button.pack(
+            side="left",
+            padx=5
+        )
+
+        refresh_button = ttk.Button(
+            history_buttons,
+            text="Refresh",
+            command=self.load_expenses
+        )
+
+        refresh_button.pack(
+            side="left",
+            padx=5
+        )
+
+        # ---------------- TABLE ----------------
+
+        table_frame = ttk.Frame(
+            history_frame
+        )
+
+        table_frame.pack(
+            fill="both",
+            expand=True
         )
 
         columns = (
@@ -249,9 +298,10 @@ class ExpenseFrame(ttk.Frame):
         )
 
         self.expense_tree = ttk.Treeview(
-            history_frame,
+            table_frame,
             columns=columns,
-            show="headings"
+            show="headings",
+            height=6
         )
 
         self.expense_tree.heading(
@@ -304,8 +354,9 @@ class ExpenseFrame(ttk.Frame):
             width=120
         )
 
+        # Vertical scrollbar
         scrollbar = ttk.Scrollbar(
-            history_frame,
+            table_frame,
             orient="vertical",
             command=self.expense_tree.yview
         )
@@ -325,50 +376,10 @@ class ExpenseFrame(ttk.Frame):
             fill="y"
         )
 
-        # History buttons
-        history_buttons = ttk.Frame(
-            self
-        )
-
-        history_buttons.pack(
-            pady=(0, 15)
-        )
-
-        edit_button = ttk.Button(
-            history_buttons,
-            text="Edit Selected",
-            command=self.edit_selected_expense
-        )
-
-        edit_button.pack(
-            side="left",
-            padx=5
-        )
-
-        delete_button = ttk.Button(
-           history_buttons,
-           text="Delete Selected",
-           command=self.delete_selected_expense,
-           style="Danger.TButton"
-         )
-        delete_button.pack(
-            side="left",
-            padx=5
-        )
-
-        refresh_button = ttk.Button(
-            history_buttons,
-            text="Refresh",
-            command=self.load_expenses
-        )
-
-        refresh_button.pack(
-            side="left",
-            padx=5
-        )
+    # ---------------- SAVE / UPDATE ----------------
 
     def save_expense(self):
-        """Save or update an expense."""
+        """Save a new expense or update an existing expense."""
 
         amount = self.amount_entry.get().strip()
         category = self.category_combo.get().strip()
@@ -411,6 +422,7 @@ class ExpenseFrame(ttk.Frame):
             )
             return
 
+        # Create Expense object
         expense = Expense(
             amount=amount,
             category=category,
@@ -419,9 +431,8 @@ class ExpenseFrame(ttk.Frame):
             expense_id=self.selected_expense_id
         )
 
-        # Add new expense
+        # Add a new expense
         if self.selected_expense_id is None:
-
             add_expense(expense)
 
             messagebox.showinfo(
@@ -429,9 +440,8 @@ class ExpenseFrame(ttk.Frame):
                 "Expense added successfully."
             )
 
-        # Update existing expense
+        # Update an existing expense
         else:
-
             update_expense(expense)
 
             messagebox.showinfo(
@@ -442,20 +452,30 @@ class ExpenseFrame(ttk.Frame):
         self.clear_form()
         self.load_expenses()
 
+        # Refresh other parts of the application
         if self.on_change:
             self.on_change()
 
-    def load_expenses(self):
-        """Load expenses from SQLite."""
+    # ---------------- READ ----------------
 
+    def load_expenses(self):
+        """Load expenses from SQLite into the table."""
+
+        # Clear current table rows
         for row in self.expense_tree.get_children():
             self.expense_tree.delete(row)
 
         expenses = get_expenses()
 
+        # Add expenses to the table
         for expense in expenses:
-
-            expense_id, amount, category, description, expense_date = expense
+            (
+                expense_id,
+                amount,
+                category,
+                description,
+                expense_date
+            ) = expense
 
             self.expense_tree.insert(
                 "",
@@ -469,8 +489,10 @@ class ExpenseFrame(ttk.Frame):
                 )
             )
 
+    # ---------------- EDIT ----------------
+
     def edit_selected_expense(self):
-        """Load an expense into the form for editing."""
+        """Load the selected expense into the form for editing."""
 
         selected = self.expense_tree.selection()
 
@@ -486,12 +508,15 @@ class ExpenseFrame(ttk.Frame):
             "values"
         )
 
+        # Store the selected expense ID
         self.selected_expense_id = int(
             values[0]
         )
 
+        # Clear the form
         self.clear_entries_only()
 
+        # Put the selected expense into the form
         self.amount_entry.insert(
             0,
             values[1]
@@ -511,9 +536,12 @@ class ExpenseFrame(ttk.Frame):
             values[4]
         )
 
+        # Change Save button to Update
         self.save_button.config(
             text="Update Expense"
         )
+
+    # ---------------- DELETE ----------------
 
     def delete_selected_expense(self):
         """Delete the selected expense."""
@@ -556,11 +584,14 @@ class ExpenseFrame(ttk.Frame):
             "Expense deleted successfully."
         )
 
+        # Refresh other screens
         if self.on_change:
             self.on_change()
 
+    # ---------------- CLEAR FORM ----------------
+
     def clear_entries_only(self):
-        """Clear expense fields."""
+        """Clear all expense form fields."""
 
         self.amount_entry.delete(
             0,
@@ -584,13 +615,16 @@ class ExpenseFrame(ttk.Frame):
 
         self.clear_entries_only()
 
+        # Put today's date back
         self.date_entry.insert(
             0,
             date.today().isoformat()
         )
 
+        # Stop editing any selected expense
         self.selected_expense_id = None
 
+        # Change button back to Save Expense
         self.save_button.config(
             text="Save Expense"
         )
