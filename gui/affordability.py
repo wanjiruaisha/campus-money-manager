@@ -1,162 +1,436 @@
 import tkinter as tk
+from tkinter import ttk, messagebox
 
-from tkinter import (
-    ttk,
-    messagebox
-)
+import customtkinter as ctk
 
 from database import (
     get_budget,
-    get_total_spent
+    get_total_spent,
 )
 
 from utils import (
     calculate_remaining_budget,
     calculate_days_remaining,
-    check_affordability
+    calculate_daily_allowance,
 )
 
 
 class AffordabilityFrame(ttk.Frame):
-    """Screen used to check whether a purchase fits the budget."""
+    """Screen used to show how a planned purchase affects the budget."""
 
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.status_var = tk.StringVar(
-            value="Enter a purchase amount to check."
+        # Scrollable area inside the Notebook tab
+        self.scrollable_frame = ctk.CTkScrollableFrame(
+            self,
+            fg_color="#F4F7FB",
+            corner_radius=0,
         )
 
-        self.remaining_var = tk.StringVar(
-            value="-"
+        self.scrollable_frame.pack(
+            fill="both",
+            expand=True,
         )
 
-        self.after_var = tk.StringVar(
-            value="-"
+        # Values displayed before purchase
+        self.current_remaining_var = tk.StringVar(
+            value="KSh 0.00"
         )
 
-        self.daily_var = tk.StringVar(
-            value="-"
+        self.current_daily_var = tk.StringVar(
+            value="KSh 0.00"
+        )
+
+        # Values displayed after purchase
+        self.after_remaining_var = tk.StringVar(
+            value="KSh 0.00"
+        )
+
+        self.after_daily_var = tk.StringVar(
+            value="KSh 0.00"
+        )
+
+        # Recommendation/result
+        self.result_var = tk.StringVar(
+            value="Enter a purchase amount to see its impact."
         )
 
         self.create_widgets()
 
     def create_widgets(self):
-        """Create affordability interface."""
+        """Create the purchase planner interface."""
 
-        title = ttk.Label(
-            self,
-            text="Can I Afford This?",
-            font=("Arial", 22, "bold")
+        # =========================
+        # PAGE HEADING
+        # =========================
+
+        heading_frame = ctk.CTkFrame(
+            self.scrollable_frame,
+            fg_color="#2563EB",
+            corner_radius=18,
+        )
+
+        heading_frame.pack(
+            fill="x",
+            padx=25,
+            pady=(20, 15),
+        )
+
+        title = ctk.CTkLabel(
+            heading_frame,
+            text="Purchase Planner",
+            text_color="white",
+            font=ctk.CTkFont(
+                size=22,
+                weight="bold",
+            ),
         )
 
         title.pack(
-            pady=(40, 10)
+            anchor="w",
+            padx=25,
+            pady=(20, 4),
         )
 
-        description = ttk.Label(
-            self,
+        subtitle = ctk.CTkLabel(
+            heading_frame,
             text=(
-                "Enter the cost of a planned purchase to see "
-                "whether it fits within your current budget."
+                "See how a planned purchase would affect "
+                "your remaining budget and daily allowance."
             ),
-            wraplength=600,
-            justify="center"
+            text_color="#DBEAFE",
+            font=ctk.CTkFont(
+                size=12,
+            ),
         )
 
-        description.pack(
-            pady=10
+        subtitle.pack(
+            anchor="w",
+            padx=25,
+            pady=(0, 20),
         )
 
-        form = ttk.LabelFrame(
-            self,
-            text="Purchase",
-            padding=20
+        # =========================
+        # PURCHASE INPUT
+        # =========================
+
+        purchase_card = ctk.CTkFrame(
+            self.scrollable_frame,
+            fg_color="white",
+            corner_radius=16,
         )
 
-        form.pack(
-            padx=40,
-            pady=20,
-            fill="x"
+        purchase_card.pack(
+            fill="x",
+            padx=25,
+            pady=10,
         )
 
-        ttk.Label(
-            form,
-            text="Purchase Amount:"
-        ).pack(
-            pady=5
+        purchase_title = ctk.CTkLabel(
+            purchase_card,
+            text="Planned Purchase",
+            text_color="#1F2937",
+            font=ctk.CTkFont(
+                size=16,
+                weight="bold",
+            ),
         )
 
-        self.purchase_entry = ttk.Entry(
-            form,
-            width=30
+        purchase_title.pack(
+            anchor="w",
+            padx=25,
+            pady=(20, 10),
+        )
+
+        self.purchase_entry = ctk.CTkEntry(
+            purchase_card,
+            placeholder_text="Enter purchase amount e.g. 1800",
+            height=42,
+            corner_radius=10,
+            border_color="#CBD5E1",
         )
 
         self.purchase_entry.pack(
-            pady=10
+            fill="x",
+            padx=25,
+            pady=(0, 15),
         )
 
-        check_button = ttk.Button(
-            form,
-            text="Check Affordability",
-            command=self.check_purchase
+        check_button = ctk.CTkButton(
+            purchase_card,
+            text="Check Purchase Impact",
+            command=self.check_purchase,
+            fg_color="#2563EB",
+            hover_color="#1D4ED8",
+            corner_radius=10,
+            height=40,
         )
 
         check_button.pack(
-            pady=10
+            pady=(0, 20),
         )
 
-        # Results
-        result_frame = ttk.LabelFrame(
-            self,
-            text="Result",
-            padding=20
+        # =========================
+        # BEFORE / AFTER SECTION
+        # =========================
+
+        comparison_frame = ctk.CTkFrame(
+            self.scrollable_frame,
+            fg_color="transparent",
         )
 
-        result_frame.pack(
-            padx=40,
-            pady=20,
-            fill="x"
+        comparison_frame.pack(
+            fill="x",
+            padx=20,
+            pady=10,
         )
 
-        ttk.Label(
-            result_frame,
-            textvariable=self.status_var,
-            font=("Arial", 14, "bold")
+        comparison_frame.grid_columnconfigure(
+            0,
+            weight=1,
+        )
+
+        comparison_frame.grid_columnconfigure(
+            1,
+            weight=1,
+        )
+
+        # -------------------------
+        # BEFORE PURCHASE
+        # -------------------------
+
+        before_card = ctk.CTkFrame(
+            comparison_frame,
+            fg_color="#DBEAFE",
+            corner_radius=16,
+        )
+
+        before_card.grid(
+            row=0,
+            column=0,
+            padx=5,
+            sticky="nsew",
+        )
+
+        before_title = ctk.CTkLabel(
+            before_card,
+            text="Before Purchase",
+            text_color="#1D4ED8",
+            font=ctk.CTkFont(
+                size=15,
+                weight="bold",
+            ),
+        )
+
+        before_title.pack(
+            anchor="w",
+            padx=20,
+            pady=(18, 12),
+        )
+
+        ctk.CTkLabel(
+            before_card,
+            text="Remaining Budget",
+            text_color="#4B5563",
+            font=ctk.CTkFont(
+                size=11,
+            ),
         ).pack(
-            pady=10
+            anchor="w",
+            padx=20,
         )
 
-        ttk.Label(
-            result_frame,
-            textvariable=self.remaining_var
+        ctk.CTkLabel(
+            before_card,
+            textvariable=self.current_remaining_var,
+            text_color="#1D4ED8",
+            font=ctk.CTkFont(
+                size=18,
+                weight="bold",
+            ),
         ).pack(
-            pady=5
+            anchor="w",
+            padx=20,
+            pady=(2, 12),
         )
 
-        ttk.Label(
-            result_frame,
-            textvariable=self.after_var
+        ctk.CTkLabel(
+            before_card,
+            text="Daily Allowance",
+            text_color="#4B5563",
+            font=ctk.CTkFont(
+                size=11,
+            ),
         ).pack(
-            pady=5
+            anchor="w",
+            padx=20,
         )
 
-        ttk.Label(
-            result_frame,
-            textvariable=self.daily_var
+        ctk.CTkLabel(
+            before_card,
+            textvariable=self.current_daily_var,
+            text_color="#1D4ED8",
+            font=ctk.CTkFont(
+                size=18,
+                weight="bold",
+            ),
         ).pack(
-            pady=5
+            anchor="w",
+            padx=20,
+            pady=(2, 18),
+        )
+
+        # -------------------------
+        # AFTER PURCHASE
+        # -------------------------
+
+        after_card = ctk.CTkFrame(
+            comparison_frame,
+            fg_color="#F8FAFC",
+            corner_radius=16,
+            border_width=1,
+            border_color="#E2E8F0",
+        )
+
+        after_card.grid(
+            row=0,
+            column=1,
+            padx=5,
+            sticky="nsew",
+        )
+
+        after_title = ctk.CTkLabel(
+            after_card,
+            text="After Purchase",
+            text_color="#1F2937",
+            font=ctk.CTkFont(
+                size=15,
+                weight="bold",
+            ),
+        )
+
+        after_title.pack(
+            anchor="w",
+            padx=20,
+            pady=(18, 12),
+        )
+
+        ctk.CTkLabel(
+            after_card,
+            text="Remaining Budget",
+            text_color="#4B5563",
+            font=ctk.CTkFont(
+                size=11,
+            ),
+        ).pack(
+            anchor="w",
+            padx=20,
+        )
+
+        self.after_remaining_label = ctk.CTkLabel(
+            after_card,
+            textvariable=self.after_remaining_var,
+            text_color="#1F2937",
+            font=ctk.CTkFont(
+                size=18,
+                weight="bold",
+            ),
+        )
+
+        self.after_remaining_label.pack(
+            anchor="w",
+            padx=20,
+            pady=(2, 12),
+        )
+
+        ctk.CTkLabel(
+            after_card,
+            text="New Daily Allowance",
+            text_color="#4B5563",
+            font=ctk.CTkFont(
+                size=11,
+            ),
+        ).pack(
+            anchor="w",
+            padx=20,
+        )
+
+        self.after_daily_label = ctk.CTkLabel(
+            after_card,
+            textvariable=self.after_daily_var,
+            text_color="#1F2937",
+            font=ctk.CTkFont(
+                size=18,
+                weight="bold",
+            ),
+        )
+
+        self.after_daily_label.pack(
+            anchor="w",
+            padx=20,
+            pady=(2, 18),
+        )
+
+        # =========================
+        # RESULT / GUIDANCE
+        # =========================
+
+        self.result_card = ctk.CTkFrame(
+            self.scrollable_frame,
+            fg_color="#F8FAFC",
+            corner_radius=16,
+            border_width=1,
+            border_color="#E2E8F0",
+        )
+
+        self.result_card.pack(
+            fill="x",
+            padx=25,
+            pady=(10, 25),
+        )
+
+        result_title = ctk.CTkLabel(
+            self.result_card,
+            text="Purchase Impact",
+            text_color="#1F2937",
+            font=ctk.CTkFont(
+                size=15,
+                weight="bold",
+            ),
+        )
+
+        result_title.pack(
+            anchor="w",
+            padx=20,
+            pady=(18, 8),
+        )
+
+        self.result_label = ctk.CTkLabel(
+            self.result_card,
+            textvariable=self.result_var,
+            text_color="#475569",
+            wraplength=750,
+            justify="left",
+            font=ctk.CTkFont(
+                size=12,
+            ),
+        )
+
+        self.result_label.pack(
+            anchor="w",
+            padx=20,
+            pady=(0, 18),
         )
 
     def check_purchase(self):
-        """Check whether a planned purchase fits the budget."""
+        """Calculate how a planned purchase affects the budget."""
 
         purchase = self.purchase_entry.get().strip()
 
+        # Validate purchase amount
         try:
-            purchase = float(
-                purchase
-            )
+            purchase = float(purchase)
 
             if purchase <= 0:
                 raise ValueError
@@ -164,16 +438,17 @@ class AffordabilityFrame(ttk.Frame):
         except ValueError:
             messagebox.showerror(
                 "Invalid Amount",
-                "Enter a valid purchase amount greater than zero."
+                "Enter a valid purchase amount greater than zero.",
             )
             return
 
+        # Get current budget
         budget = get_budget()
 
         if budget is None:
             messagebox.showwarning(
                 "No Budget",
-                "Please set a budget first."
+                "Please set a budget first.",
             )
             return
 
@@ -182,54 +457,130 @@ class AffordabilityFrame(ttk.Frame):
             budget_amount,
             period,
             start_date,
-            end_date
+            end_date,
         ) = budget
 
+        # Get total spending during the current budget period
         total_spent = get_total_spent(
             start_date,
-            end_date
+            end_date,
         )
 
+        # Calculate current remaining money
         remaining = calculate_remaining_budget(
             budget_amount,
-            total_spent
+            total_spent,
         )
 
+        # Calculate days remaining
         days_left = calculate_days_remaining(
             end_date
         )
 
-        (
-            affordable,
-            remaining_after,
-            daily_after
-        ) = check_affordability(
+        # Current daily allowance
+        current_daily = calculate_daily_allowance(
             remaining,
-            purchase,
-            days_left
+            days_left,
         )
 
-        self.remaining_var.set(
-            f"Current remaining budget: "
-            f"KSh {remaining:,.2f}"
+        # Calculate money remaining after purchase
+        remaining_after = (
+            remaining - purchase
         )
 
-        self.after_var.set(
-            f"Money after purchase: "
-            f"KSh {remaining_after:,.2f}"
-        )
-
-        self.daily_var.set(
-            f"Daily allowance after purchase: "
-            f"KSh {daily_after:,.2f}"
-        )
-
-        if affordable:
-            self.status_var.set(
-                "✓ This purchase fits within your current budget."
+        # Calculate daily allowance after purchase
+        if remaining_after > 0:
+            daily_after = calculate_daily_allowance(
+                remaining_after,
+                days_left,
             )
 
         else:
-            self.status_var.set(
-                "✗ This purchase exceeds your remaining budget."
+            daily_after = 0
+
+        # -------------------------
+        # DISPLAY BEFORE VALUES
+        # -------------------------
+
+        self.current_remaining_var.set(
+            f"KSh {remaining:,.2f}"
+        )
+
+        self.current_daily_var.set(
+            f"KSh {current_daily:,.2f} / day"
+        )
+
+        # -------------------------
+        # DISPLAY AFTER VALUES
+        # -------------------------
+
+        self.after_remaining_var.set(
+            f"KSh {remaining_after:,.2f}"
+        )
+
+        self.after_daily_var.set(
+            f"KSh {daily_after:,.2f} / day"
+        )
+
+        # -------------------------
+        # RESULT
+        # -------------------------
+
+        if remaining_after < 0:
+
+            exceeded_by = abs(
+                remaining_after
+            )
+
+            self.result_var.set(
+                (
+                    f"This purchase would exceed your remaining "
+                    f"budget by KSh {exceeded_by:,.2f}."
+                )
+            )
+
+            self.result_card.configure(
+                fg_color="#FEE2E2",
+                border_color="#FCA5A5",
+            )
+
+            self.result_label.configure(
+                text_color="#DC2626"
+            )
+
+            self.after_remaining_label.configure(
+                text_color="#DC2626"
+            )
+
+            self.after_daily_label.configure(
+                text_color="#DC2626"
+            )
+
+        else:
+
+            self.result_var.set(
+                (
+                    f"This purchase fits within your remaining budget. "
+                    f"Your daily allowance would change from "
+                    f"KSh {current_daily:,.2f} to "
+                    f"KSh {daily_after:,.2f} for the remaining "
+                    f"{days_left} day(s)."
+                )
+            )
+
+            self.result_card.configure(
+                fg_color="#DCFCE7",
+                border_color="#86EFAC",
+            )
+
+            self.result_label.configure(
+                text_color="#15803D"
+            )
+
+            self.after_remaining_label.configure(
+                text_color="#15803D"
+            )
+
+            self.after_daily_label.configure(
+                text_color="#15803D"
             )
