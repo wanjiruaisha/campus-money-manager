@@ -1,5 +1,6 @@
 import sqlite3
-
+import hashlib
+import secrets
 
 DATABASE_NAME = "campus_money.db"
 
@@ -37,6 +38,16 @@ def create_tables():
         )
     """)
 
+    # authentication table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        salt TEXT NOT NULL
+    )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -45,13 +56,15 @@ def create_tables():
 # EXPENSE FUNCTIONS
 # =========================
 
+
 def add_expense(expense):
     """Add a new expense."""
 
     conn = connect_db()
     cursor = conn.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT INTO expenses (
             amount,
             category,
@@ -59,12 +72,9 @@ def add_expense(expense):
             date
         )
         VALUES (?, ?, ?, ?)
-    """, (
-        expense.amount,
-        expense.category,
-        expense.description,
-        expense.date
-    ))
+    """,
+        (expense.amount, expense.category, expense.description, expense.date),
+    )
 
     conn.commit()
 
@@ -105,7 +115,8 @@ def update_expense(expense):
     conn = connect_db()
     cursor = conn.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         UPDATE expenses
         SET
             amount = ?,
@@ -113,13 +124,15 @@ def update_expense(expense):
             description = ?,
             date = ?
         WHERE id = ?
-    """, (
-        expense.amount,
-        expense.category,
-        expense.description,
-        expense.date,
-        expense.expense_id
-    ))
+    """,
+        (
+            expense.amount,
+            expense.category,
+            expense.description,
+            expense.date,
+            expense.expense_id,
+        ),
+    )
 
     conn.commit()
     conn.close()
@@ -131,12 +144,13 @@ def delete_expense(expense_id):
     conn = connect_db()
     cursor = conn.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         DELETE FROM expenses
         WHERE id = ?
-    """, (
-        expense_id,
-    ))
+    """,
+        (expense_id,),
+    )
 
     conn.commit()
     conn.close()
@@ -148,7 +162,8 @@ def get_recent_expenses(limit=5):
     conn = connect_db()
     cursor = conn.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             id,
             amount,
@@ -158,9 +173,9 @@ def get_recent_expenses(limit=5):
         FROM expenses
         ORDER BY date DESC, id DESC
         LIMIT ?
-    """, (
-        limit,
-    ))
+    """,
+        (limit,),
+    )
 
     expenses = cursor.fetchall()
 
@@ -176,14 +191,14 @@ def get_total_spent(start_date=None, end_date=None):
     cursor = conn.cursor()
 
     if start_date and end_date:
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COALESCE(SUM(amount), 0)
             FROM expenses
             WHERE date BETWEEN ? AND ?
-        """, (
-            start_date,
-            end_date
-        ))
+        """,
+            (start_date, end_date),
+        )
 
     else:
         cursor.execute("""
@@ -202,6 +217,7 @@ def get_total_spent(start_date=None, end_date=None):
 # BUDGET FUNCTIONS
 # =========================
 
+
 def save_budget(budget):
     """Create or update the user's budget."""
 
@@ -218,7 +234,8 @@ def save_budget(budget):
     existing_budget = cursor.fetchone()
 
     if existing_budget:
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE budget
             SET
                 amount = ?,
@@ -226,15 +243,13 @@ def save_budget(budget):
                 start_date = ?,
                 end_date = ?
             WHERE id = 1
-        """, (
-            budget.amount,
-            budget.period,
-            budget.start_date,
-            budget.end_date
-        ))
+        """,
+            (budget.amount, budget.period, budget.start_date, budget.end_date),
+        )
 
     else:
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO budget (
                 id,
                 amount,
@@ -243,12 +258,9 @@ def save_budget(budget):
                 end_date
             )
             VALUES (1, ?, ?, ?, ?)
-        """, (
-            budget.amount,
-            budget.period,
-            budget.start_date,
-            budget.end_date
-        ))
+        """,
+            (budget.amount, budget.period, budget.start_date, budget.end_date),
+        )
 
     conn.commit()
     conn.close()
@@ -276,3 +288,114 @@ def get_budget():
     conn.close()
 
     return budget
+
+
+def hash_password(password, salt):
+    """Create a secure hash from a password and salt."""
+
+    password_hash = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode(),
+        bytes.fromhex(salt),
+        100000,
+    )
+
+    return password_hash.hex()
+
+
+def create_user(username, password):
+    """Create a new user account."""
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    # Check whether the username already exists
+    cursor.execute(
+        """
+        SELECT id
+        FROM users
+        WHERE username = ?
+        """,
+        (username,),
+    )
+
+    existing_user = cursor.fetchone()
+
+    if existing_user:
+        conn.close()
+        return False, "Username already exists."
+
+    # Create a random salt for this password
+    salt = secrets.token_hex(16)
+
+    # Hash the password
+    password_hash = hash_password(
+        password,
+        salt,
+    )
+
+    # Save user
+    cursor.execute(
+        """
+        INSERT INTO users (
+            username,
+            password_hash,
+            salt
+        )
+        VALUES (?, ?, ?)
+        """,
+        (
+            username,
+            password_hash,
+            salt,
+        ),
+    )
+
+    conn.commit()
+
+    user_id = cursor.lastrowid
+
+    conn.close()
+
+    return True, user_id
+
+
+def authenticate_user(username, password):
+    """Check whether a username and password are correct."""
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT id, username, password_hash, salt
+        FROM users
+        WHERE username = ?
+        """,
+        (username,),
+    )
+
+    user = cursor.fetchone()
+
+    conn.close()
+
+    # Username does not exist
+    if user is None:
+        return None
+
+    user_id, stored_username, stored_hash, salt = user
+
+    # Hash the entered password using the stored salt
+    entered_hash = hash_password(
+        password,
+        salt,
+    )
+
+    # Compare the hashes
+    if entered_hash == stored_hash:
+        return {
+            "id": user_id,
+            "username": stored_username,
+        }
+
+    return None
