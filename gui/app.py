@@ -70,9 +70,8 @@ class CampusMoneyApp:
 
         self.notebook.add(
             self.affordability_frame,
-            text="Can I Afford This?"
+             text="Purchase Planner"
         )
-
         # Refresh data when switching tabs
         self.notebook.bind(
             "<<NotebookTabChanged>>",
