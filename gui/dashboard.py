@@ -424,7 +424,7 @@ class DashboardFrame(ttk.Frame):
         # Affordability
         afford_button = ctk.CTkButton(
             button_frame,
-            text="Can I Afford This?",
+            text="Purchase Planner",
             fg_color="#7C3AED",
             hover_color="#6D28D9",
             corner_radius=10,
