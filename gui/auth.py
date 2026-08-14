@@ -29,7 +29,10 @@ class AuthFrame(ctk.CTkFrame):
     def create_widgets(self):
         """Create the authentication interface."""
 
-        # Main container
+        # =========================
+        # MAIN CONTAINER
+        # =========================
+
         main_frame = ctk.CTkFrame(
             self,
             fg_color="transparent",
@@ -38,8 +41,8 @@ class AuthFrame(ctk.CTkFrame):
         main_frame.pack(
             fill="both",
             expand=True,
-            padx=40,
-            pady=40,
+            padx=25,
+            pady=25,
         )
 
         main_frame.grid_columnconfigure(
@@ -71,21 +74,21 @@ class AuthFrame(ctk.CTkFrame):
             row=0,
             column=0,
             sticky="nsew",
-            padx=(0, 10),
+            padx=(0, 8),
         )
 
         app_icon = ctk.CTkLabel(
             info_frame,
             text="💰",
             font=ctk.CTkFont(
-                size=45,
+                size=42,
             ),
         )
 
         app_icon.pack(
             anchor="w",
-            padx=35,
-            pady=(60, 15),
+            padx=30,
+            pady=(45, 12),
         )
 
         title = ctk.CTkLabel(
@@ -93,14 +96,14 @@ class AuthFrame(ctk.CTkFrame):
             text="Campus Money Manager",
             text_color="white",
             font=ctk.CTkFont(
-                size=27,
+                size=25,
                 weight="bold",
             ),
         )
 
         title.pack(
             anchor="w",
-            padx=35,
+            padx=30,
         )
 
         subtitle = ctk.CTkLabel(
@@ -111,16 +114,16 @@ class AuthFrame(ctk.CTkFrame):
             ),
             text_color="#DBEAFE",
             font=ctk.CTkFont(
-                size=13,
+                size=12,
             ),
-            wraplength=350,
+            wraplength=320,
             justify="left",
         )
 
         subtitle.pack(
             anchor="w",
-            padx=35,
-            pady=(10, 30),
+            padx=30,
+            pady=(10, 25),
         )
 
         features = (
@@ -135,14 +138,15 @@ class AuthFrame(ctk.CTkFrame):
             text=features,
             text_color="white",
             font=ctk.CTkFont(
-                size=13,
+                size=12,
             ),
             justify="left",
         )
 
         feature_label.pack(
             anchor="w",
-            padx=35,
+            padx=30,
+            pady=(0, 30),
         )
 
         # =========================
@@ -159,7 +163,7 @@ class AuthFrame(ctk.CTkFrame):
             row=0,
             column=1,
             sticky="nsew",
-            padx=(10, 0),
+            padx=(8, 0),
         )
 
         auth_title = ctk.CTkLabel(
@@ -167,13 +171,13 @@ class AuthFrame(ctk.CTkFrame):
             text="Welcome",
             text_color="#1F2937",
             font=ctk.CTkFont(
-                size=24,
+                size=23,
                 weight="bold",
             ),
         )
 
         auth_title.pack(
-            pady=(45, 5),
+            pady=(25, 5),
         )
 
         auth_subtitle = ctk.CTkLabel(
@@ -181,15 +185,18 @@ class AuthFrame(ctk.CTkFrame):
             text="Log in or create an account to continue.",
             text_color="#6B7280",
             font=ctk.CTkFont(
-                size=12,
+                size=11,
             ),
         )
 
         auth_subtitle.pack(
-            pady=(0, 20),
+            pady=(0, 15),
         )
 
-        # Tabs for Login and Sign Up
+        # =========================
+        # LOGIN / CREATE TABS
+        # =========================
+
         self.auth_tabs = ctk.CTkTabview(
             auth_card,
             fg_color="#F8FAFC",
@@ -201,8 +208,8 @@ class AuthFrame(ctk.CTkFrame):
         self.auth_tabs.pack(
             fill="both",
             expand=True,
-            padx=30,
-            pady=(0, 30),
+            padx=20,
+            pady=(0, 20),
         )
 
         self.auth_tabs.add(
@@ -221,14 +228,26 @@ class AuthFrame(ctk.CTkFrame):
     # =========================
 
     def create_login_tab(self):
-        """Create login form."""
+        """Create the login form."""
 
         login_tab = self.auth_tabs.tab(
             "Login"
         )
 
-        login_title = ctk.CTkLabel(
+        # Scrollable so the form works on smaller screens
+        login_scroll = ctk.CTkScrollableFrame(
             login_tab,
+            fg_color="transparent",
+            corner_radius=0,
+        )
+
+        login_scroll.pack(
+            fill="both",
+            expand=True,
+        )
+
+        login_title = ctk.CTkLabel(
+            login_scroll,
             text="Log In",
             text_color="#1F2937",
             font=ctk.CTkFont(
@@ -240,11 +259,11 @@ class AuthFrame(ctk.CTkFrame):
         login_title.pack(
             anchor="w",
             padx=20,
-            pady=(25, 5),
+            pady=(20, 5),
         )
 
         login_text = ctk.CTkLabel(
-            login_tab,
+            login_scroll,
             text="Enter your account details.",
             text_color="#6B7280",
             font=ctk.CTkFont(
@@ -255,12 +274,12 @@ class AuthFrame(ctk.CTkFrame):
         login_text.pack(
             anchor="w",
             padx=20,
-            pady=(0, 20),
+            pady=(0, 18),
         )
 
-        # Username
+        # Username label
         username_label = ctk.CTkLabel(
-            login_tab,
+            login_scroll,
             text="Username",
             text_color="#374151",
             font=ctk.CTkFont(
@@ -275,10 +294,11 @@ class AuthFrame(ctk.CTkFrame):
             pady=(0, 5),
         )
 
+        # Username entry
         self.login_username_entry = ctk.CTkEntry(
-            login_tab,
+            login_scroll,
             placeholder_text="Enter username",
-            height=42,
+            height=40,
             corner_radius=10,
             border_color="#CBD5E1",
         )
@@ -289,9 +309,9 @@ class AuthFrame(ctk.CTkFrame):
             pady=(0, 15),
         )
 
-        # Password
+        # Password label
         password_label = ctk.CTkLabel(
-            login_tab,
+            login_scroll,
             text="Password",
             text_color="#374151",
             font=ctk.CTkFont(
@@ -306,11 +326,12 @@ class AuthFrame(ctk.CTkFrame):
             pady=(0, 5),
         )
 
+        # Password entry
         self.login_password_entry = ctk.CTkEntry(
-            login_tab,
+            login_scroll,
             placeholder_text="Enter password",
             show="•",
-            height=42,
+            height=40,
             corner_radius=10,
             border_color="#CBD5E1",
         )
@@ -321,23 +342,24 @@ class AuthFrame(ctk.CTkFrame):
             pady=(0, 20),
         )
 
+        # Login button
         login_button = ctk.CTkButton(
-            login_tab,
+            login_scroll,
             text="Log In",
             command=self.login,
             fg_color="#2563EB",
             hover_color="#1D4ED8",
-            height=42,
+            height=40,
             corner_radius=10,
         )
 
         login_button.pack(
             fill="x",
             padx=20,
-            pady=(0, 20),
+            pady=(0, 30),
         )
 
-        # Allow Enter key to log in
+        # Pressing Enter also logs in
         self.login_password_entry.bind(
             "<Return>",
             lambda event: self.login(),
@@ -348,14 +370,26 @@ class AuthFrame(ctk.CTkFrame):
     # =========================
 
     def create_signup_tab(self):
-        """Create account registration form."""
+        """Create the account registration form."""
 
         signup_tab = self.auth_tabs.tab(
             "Create Account"
         )
 
-        signup_title = ctk.CTkLabel(
+        # Scrollable so the button remains reachable
+        signup_scroll = ctk.CTkScrollableFrame(
             signup_tab,
+            fg_color="transparent",
+            corner_radius=0,
+        )
+
+        signup_scroll.pack(
+            fill="both",
+            expand=True,
+        )
+
+        signup_title = ctk.CTkLabel(
+            signup_scroll,
             text="Create Account",
             text_color="#1F2937",
             font=ctk.CTkFont(
@@ -367,11 +401,11 @@ class AuthFrame(ctk.CTkFrame):
         signup_title.pack(
             anchor="w",
             padx=20,
-            pady=(25, 5),
+            pady=(20, 5),
         )
 
         signup_text = ctk.CTkLabel(
-            signup_tab,
+            signup_scroll,
             text="Create an account to start managing your money.",
             text_color="#6B7280",
             font=ctk.CTkFont(
@@ -382,12 +416,12 @@ class AuthFrame(ctk.CTkFrame):
         signup_text.pack(
             anchor="w",
             padx=20,
-            pady=(0, 20),
+            pady=(0, 18),
         )
 
-        # Username
+        # Username label
         username_label = ctk.CTkLabel(
-            signup_tab,
+            signup_scroll,
             text="Username",
             text_color="#374151",
             font=ctk.CTkFont(
@@ -402,10 +436,11 @@ class AuthFrame(ctk.CTkFrame):
             pady=(0, 5),
         )
 
+        # Username entry
         self.signup_username_entry = ctk.CTkEntry(
-            signup_tab,
+            signup_scroll,
             placeholder_text="Choose a username",
-            height=42,
+            height=40,
             corner_radius=10,
             border_color="#CBD5E1",
         )
@@ -416,9 +451,9 @@ class AuthFrame(ctk.CTkFrame):
             pady=(0, 15),
         )
 
-        # Password
+        # Password label
         password_label = ctk.CTkLabel(
-            signup_tab,
+            signup_scroll,
             text="Password",
             text_color="#374151",
             font=ctk.CTkFont(
@@ -433,11 +468,12 @@ class AuthFrame(ctk.CTkFrame):
             pady=(0, 5),
         )
 
+        # Password entry
         self.signup_password_entry = ctk.CTkEntry(
-            signup_tab,
+            signup_scroll,
             placeholder_text="Create a password",
             show="•",
-            height=42,
+            height=40,
             corner_radius=10,
             border_color="#CBD5E1",
         )
@@ -448,9 +484,9 @@ class AuthFrame(ctk.CTkFrame):
             pady=(0, 15),
         )
 
-        # Confirm password
+        # Confirm password label
         confirm_label = ctk.CTkLabel(
-            signup_tab,
+            signup_scroll,
             text="Confirm Password",
             text_color="#374151",
             font=ctk.CTkFont(
@@ -465,11 +501,12 @@ class AuthFrame(ctk.CTkFrame):
             pady=(0, 5),
         )
 
+        # Confirm password entry
         self.confirm_password_entry = ctk.CTkEntry(
-            signup_tab,
+            signup_scroll,
             placeholder_text="Enter password again",
             show="•",
-            height=42,
+            height=40,
             corner_radius=10,
             border_color="#CBD5E1",
         )
@@ -480,20 +517,21 @@ class AuthFrame(ctk.CTkFrame):
             pady=(0, 20),
         )
 
+        # Create Account button
         signup_button = ctk.CTkButton(
-            signup_tab,
+            signup_scroll,
             text="Create Account",
             command=self.signup,
             fg_color="#16A34A",
             hover_color="#15803D",
-            height=42,
+            height=40,
             corner_radius=10,
         )
 
         signup_button.pack(
             fill="x",
             padx=20,
-            pady=(0, 20),
+            pady=(0, 35),
         )
 
     # =========================
@@ -514,7 +552,7 @@ class AuthFrame(ctk.CTkFrame):
             .get()
         )
 
-        # Make sure fields are filled
+        # Make sure both fields are filled
         if not username or not password:
             messagebox.showerror(
                 "Missing Information",
@@ -522,12 +560,13 @@ class AuthFrame(ctk.CTkFrame):
             )
             return
 
-        # Check credentials
+        # Check login details
         user = authenticate_user(
             username,
             password,
         )
 
+        # Login failed
         if user is None:
             messagebox.showerror(
                 "Login Failed",
@@ -535,7 +574,7 @@ class AuthFrame(ctk.CTkFrame):
             )
             return
 
-        # Login succeeded
+        # Login successful
         self.on_login_success(
             user
         )
@@ -563,7 +602,7 @@ class AuthFrame(ctk.CTkFrame):
             .get()
         )
 
-        # Check required fields
+        # Make sure all fields are filled
         if (
             not username
             or not password
@@ -575,7 +614,7 @@ class AuthFrame(ctk.CTkFrame):
             )
             return
 
-        # Username must have at least 3 characters
+        # Username validation
         if len(username) < 3:
             messagebox.showerror(
                 "Invalid Username",
@@ -583,7 +622,7 @@ class AuthFrame(ctk.CTkFrame):
             )
             return
 
-        # Password must have at least 6 characters
+        # Password validation
         if len(password) < 6:
             messagebox.showerror(
                 "Weak Password",
@@ -591,7 +630,7 @@ class AuthFrame(ctk.CTkFrame):
             )
             return
 
-        # Make sure passwords match
+        # Confirm passwords match
         if password != confirm_password:
             messagebox.showerror(
                 "Passwords Do Not Match",
@@ -599,7 +638,7 @@ class AuthFrame(ctk.CTkFrame):
             )
             return
 
-        # Create account
+        # Create the account
         success, result = create_user(
             username,
             password,
@@ -620,7 +659,7 @@ class AuthFrame(ctk.CTkFrame):
             ),
         )
 
-        # Clear signup form
+        # Clear signup fields
         self.signup_username_entry.delete(
             0,
             "end",
@@ -636,13 +675,12 @@ class AuthFrame(ctk.CTkFrame):
             "end",
         )
 
-        # Move user to Login tab
+        # Switch back to Login
         self.auth_tabs.set(
             "Login"
         )
 
-        # Automatically place username
-        # into login field
+        # Automatically copy username to login form
         self.login_username_entry.delete(
             0,
             "end",
@@ -653,5 +691,5 @@ class AuthFrame(ctk.CTkFrame):
             username,
         )
 
-        # Focus password field
+        # Move cursor to password field
         self.login_password_entry.focus()
