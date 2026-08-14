@@ -70,6 +70,46 @@ class CampusMoneyApp:
 
         self.clear_root()
 
+        # =========================
+        # TOP BAR
+        # =========================
+
+        top_bar = ttk.Frame(self.root)
+
+        top_bar.pack(
+        fill="x",
+        padx=10,
+        pady=(10, 0),
+        )
+
+        # Show logged-in username
+        user_label = ttk.Label(
+        top_bar,
+        text=f"Logged in as: {self.current_user['username']}",
+        )
+
+        user_label.pack(
+        side="left",
+        padx=10,
+        pady=5,
+        )
+
+        # Logout button
+        logout_button = ttk.Button(
+        top_bar,
+        text="Logout",
+        command=self.logout,
+        )
+
+        logout_button.pack(
+        side="right",
+        padx=10,
+        pady=5,
+        )
+
+
+        
+
         # Create Notebook navigation
         self.notebook = ttk.Notebook(self.root)
 
@@ -164,3 +204,18 @@ class CampusMoneyApp:
 
         for widget in self.root.winfo_children():
             widget.destroy()
+
+    # =========================
+    # LOGOUT FUNCTION
+    # =========================
+
+    def logout(self):
+        """Log the current user out."""
+
+        self.current_user = None
+
+        # Clear the active user from the database
+        set_current_user(None)
+
+        # Return to login screen
+        self.show_auth()
